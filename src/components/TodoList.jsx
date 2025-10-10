@@ -5,7 +5,7 @@ import {
   TextField,
   Divider,
 } from '@mui/material';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import Todo from './Todo';
 import {v4 as uuid4} from 'uuid';
 
@@ -26,18 +26,25 @@ export default function TodoList() {
   const [tasksList, setTasksList] = useState(tasks);
   const [listView, setListView] = useState('all');
 
-
+  useEffect(()=>{
+    setTasks(JSON.parse(localStorage.getItem('tasks')));
+  }, [])
 
   function addTask() {
-    let newTasks = {
+    let newTask = {
       id: uuid4(),
       taskName: inputValue,
       taskInfo: 'this is for details Task One',
       isDone: false,
     };
-    setTasks([...tasks, newTasks]);
+
+    const updateTasks = [...tasks, newTask];
+    setTasks(updateTasks);
+    localStorage.setItem('tasks', JSON.stringify(updateTasks));
     setInputValue('');
   }
+
+  // localStorage.clear()
 
   function handleCheck(id) {
     const newTasks = tasks.map((task) => {
@@ -47,6 +54,7 @@ export default function TodoList() {
       return task;
     });
     setTasks(newTasks);
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
   }
 
   function handleDelete(id) {
@@ -54,6 +62,8 @@ export default function TodoList() {
       return task.id == id ? null : task;
     });
     setTasks(newTasks);
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
+    console.log(newTasks)
   }
 
   function handleCheckComplete(value) {
@@ -176,7 +186,6 @@ export default function TodoList() {
             value={inputValue}
             onChange={(event) => {
               setInputValue(event.target.value);
-              console.log(event.target.value);
             }}
           />
         </div>

@@ -15,8 +15,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
+import {TextField} from '@mui/material';
 
-export default function Todo({task, setTasks, handleCheck, handleDelete}) {
+export default function Todo({task, handleCheck, handleDelete, handleEdit}) {
   const [open, setOpen] = React.useState(false);
   // Open and close to alert
   const handleClickOpen = () => {
@@ -28,6 +29,27 @@ export default function Todo({task, setTasks, handleCheck, handleDelete}) {
     value? handleDelete(task.id) : null;
   };
   // Open and close to alert/
+  // Open and close edit dialog
+    const [openEditDialog, setopenEditDialog] = React.useState(false);
+
+    const handleOpenEdit = () => {
+      setopenEditDialog(true);
+    };
+
+    const handleCloseEdit = () => {
+      setopenEditDialog(false);
+    };
+
+    const handleSubmit = (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const formJson = Object.fromEntries(formData.entries());
+      const text = formJson.text;
+      console.log(text);
+      handleEdit(task.id, text)
+      handleCloseEdit();
+    };
+  // Open and close edit dialog/
 
   return (
     <>
@@ -56,7 +78,7 @@ export default function Todo({task, setTasks, handleCheck, handleDelete}) {
               >
                 <DeleteIcon />
               </IconButton>
-              <IconButton aria-label="edit">
+              <IconButton aria-label="edit" onClick={handleOpenEdit}>
                 <EditIcon />
               </IconButton>
               <IconButton
@@ -109,6 +131,36 @@ export default function Todo({task, setTasks, handleCheck, handleDelete}) {
         </DialogActions>
       </Dialog>
       {/* /Alert before delete */}
+
+      {/* Edit Dialog */}
+      <Dialog open={openEditDialog} onClose={handleCloseEdit}>
+        <DialogTitle>Edit Task</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter the new task name, and task details
+          </DialogContentText>
+          <form onSubmit={handleSubmit} id="subscription-form">
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="name"
+              name="text"
+              label="Text Address"
+              type="text"
+              fullWidth
+              variant="standard"
+            />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit}>Cancel</Button>
+          <Button type="submit" form="subscription-form">
+            Edit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Edit Dialog/ */}
     </>
   );
 }

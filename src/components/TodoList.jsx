@@ -77,6 +77,12 @@ export default function TodoList() {
     }
   }
 
+  function handleEdit(id, text){
+    const newTasks = tasks.map((task)=>{
+      return task.id == id? task.taskName = text: null
+    })
+  }
+
   function viewTasks() {
     if (listView == 'all') {
       return tasks.map((task) => {
@@ -86,6 +92,7 @@ export default function TodoList() {
             task={task}
             handleCheck={handleCheck}
             handleDelete={handleDelete}
+            handleEdit={handleEdit}
           />
         );
       });
@@ -97,6 +104,7 @@ export default function TodoList() {
             task={task}
             handleCheck={handleCheck}
             handleDelete={handleDelete}
+            handleEdit={handleEdit}
           />
         );
       });
@@ -108,6 +116,7 @@ export default function TodoList() {
             task={task}
             handleCheck={handleCheck}
             handleDelete={handleDelete}
+            handleEdit={handleEdit}
           />
         );
       });

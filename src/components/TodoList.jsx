@@ -4,11 +4,12 @@ import {
   Button,
   TextField,
   Divider,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {useEffect, useState} from 'react';
 import Todo from './Todo';
 import {v4 as uuid4} from 'uuid';
-
+import {ToggleButton} from '@mui/material';
 
 export default function TodoList() {
   const [tasks, setTasks] = useState([
@@ -23,12 +24,30 @@ export default function TodoList() {
   const [taskNotComplete, setTaskNotComplete] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
-  const [tasksList, setTasksList] = useState(tasks);
+  // const [tasksList, setTasksList] = useState(tasks);
   const [listView, setListView] = useState('all');
 
-  useEffect(()=>{
+  useEffect(() => {
     setTasks(JSON.parse(localStorage.getItem('tasks')));
-  }, [])
+  }, []);
+
+  const completedTask = tasks.filter((task) => {
+    return task.isDone;
+  });
+
+  const notCompletedTask = tasks.filter((task) => {
+    return !task.isDone;
+  });
+
+  let tasksToBeRender = tasks;
+
+  if (listView == 'done') {
+    tasksToBeRender = completedTask;
+  } else if (listView == 'notDone') {
+    tasksToBeRender = notCompletedTask;
+  } else {
+    tasksToBeRender = tasks;
+  }
 
   function addTask() {
     let newTask = {
@@ -63,74 +82,40 @@ export default function TodoList() {
     });
     setTasks(newTasks);
     localStorage.setItem('tasks', JSON.stringify(newTasks));
-    console.log(newTasks)
   }
 
   function handleCheckComplete(value) {
-    const filterTasks = tasks.filter((task) => {
-      if (value == 'all') {
-        return task;
-      } else if (value == 'done') {
-        return task.isDone == true ? task : null;
-      } else if (value == 'notDone') {
-        return task.isDone == false ? task : null;
-      }
-    });
     if (value == 'done') {
-      setListView('done');
-      setTaskComplete(filterTasks);
+      setListView(value);
     } else if (value == 'notDone') {
-      setListView('notDone');
-      setTaskNotComplete(filterTasks);
+      setListView(value);
     } else if (value == 'all') {
-      setListView('all');
+      setListView(value);
     }
   }
 
-  function handleEdit(id, text){
-    const newTasks = tasks.map((task)=>{
-      return task.id == id? task.taskName = text: null
-    })
+  function handleEdit(id, text) {
+    const newTasks = tasks.map((task) => {
+      return task.id == id ? {...task, taskName: text} : task;
+    });
+    setTasks(newTasks);
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
   }
+
+  // let taskComplete = tasks
 
   function viewTasks() {
-    if (listView == 'all') {
-      return tasks.map((task) => {
-        return (
-          <Todo
-            key={task.id}
-            task={task}
-            handleCheck={handleCheck}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
-          />
-        );
-      });
-    } else if (listView == 'done') {
-      return taskComplete.map((task) => {
-        return (
-          <Todo
-            key={task.id}
-            task={task}
-            handleCheck={handleCheck}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
-          />
-        );
-      });
-    } else if (listView == 'notDone') {
-      return taskNotComplete.map((task) => {
-        return (
-          <Todo
-            key={task.id}
-            task={task}
-            handleCheck={handleCheck}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
-          />
-        );
-      });
-    }
+    return tasksToBeRender.map((task) => {
+      return (
+        <Todo
+          key={task.id}
+          task={task}
+          handleCheck={handleCheck}
+          handleDelete={handleDelete}
+          handleEdit={handleEdit}
+        />
+      );
+    });
   }
 
   return (
@@ -141,33 +126,37 @@ export default function TodoList() {
       >
         <h1>My Tasks</h1>
         <Divider />
-        <ButtonGroup
+        <ToggleButtonGroup
+          value={listView}
           style={{margin: '15px'}}
           variant="contained"
           aria-label="Basic button group"
         >
-          <Button
+          <ToggleButton
+            value={'all'}
             onClick={() => {
               handleCheckComplete('all');
             }}
           >
             All
-          </Button>
-          <Button
+          </ToggleButton>
+          <ToggleButton
+            value={'done'}
             onClick={() => {
               handleCheckComplete('done');
             }}
           >
             Done
-          </Button>
-          <Button
+          </ToggleButton>
+          <ToggleButton
+            value={'notDone'}
             onClick={() => {
               handleCheckComplete('notDone');
             }}
           >
             Not Done
-          </Button>
-        </ButtonGroup>
+          </ToggleButton>
+        </ToggleButtonGroup>
         {viewTasks()}
         <div style={{paddingTop: '30px', paddingBottom: '30px', width: '100%'}}>
           <Button
@@ -189,8 +178,6 @@ export default function TodoList() {
             }}
           />
         </div>
-
-        
       </Container>
     </>
   );

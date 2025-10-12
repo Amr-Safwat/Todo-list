@@ -28,7 +28,7 @@ export default function TodoList() {
   const [listView, setListView] = useState('all');
 
   useEffect(() => {
-    setTasks(JSON.parse(localStorage.getItem('tasks')));
+    setTasks( JSON.parse(localStorage.getItem('tasks')) ?? []);
   }, []);
 
   const completedTask = tasks.filter((task) => {
@@ -86,7 +86,7 @@ export default function TodoList() {
 
   function handleCheckComplete(value) {
     if (value == 'done') {
-      setListView(value);
+      setListView(value); 
     } else if (value == 'notDone') {
       setListView(value);
     } else if (value == 'all') {
@@ -157,12 +157,13 @@ export default function TodoList() {
             Not Done
           </ToggleButton>
         </ToggleButtonGroup>
-        {viewTasks()}
+        <div className="tasks">{viewTasks()}</div>
         <div style={{paddingTop: '30px', paddingBottom: '30px', width: '100%'}}>
           <Button
             style={{marginRight: '10px', width: '60px'}}
             variant="contained"
             onClick={addTask}
+            disabled={inputValue.length == 0}
           >
             Add
           </Button>

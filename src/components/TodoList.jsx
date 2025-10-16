@@ -18,7 +18,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 
 import {useContext} from 'react';
-import {OpenSnackContext} from './OpenSnackContext';
+import {OpenSnackContext} from './SnackContext';
 
 export default function TodoList() {
   const [tasks, setTasks] = useState([

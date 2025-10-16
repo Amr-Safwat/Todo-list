@@ -6,10 +6,19 @@ import {
   Divider,
   ToggleButtonGroup,
 } from '@mui/material';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo} from 'react';
 import Todo from './Todo';
 import {v4 as uuid4} from 'uuid';
 import {ToggleButton} from '@mui/material';
+import * as React from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+
+import {useContext} from 'react';
+import {OpenSnackContext} from './OpenSnackContext';
 
 export default function TodoList() {
   const [tasks, setTasks] = useState([
@@ -20,24 +29,30 @@ export default function TodoList() {
       isDone: false,
     },
   ]);
-  const [taskComplete, setTaskComplete] = useState([]);
-  const [taskNotComplete, setTaskNotComplete] = useState([]);
   const [inputValue, setInputValue] = useState('');
-
-  // const [tasksList, setTasksList] = useState(tasks);
   const [listView, setListView] = useState('all');
+  const [open, setOpen] = React.useState(false);
+  const [taskId, setTaskId] = useState();
+  const [openEditDialog, setopenEditDialog] = React.useState(false);
+  const [editTaskId, setEditTaskId] = useState();
+
+  const openSnack = useContext(OpenSnackContext);
 
   useEffect(() => {
-    setTasks( JSON.parse(localStorage.getItem('tasks')) ?? []);
+    setTasks(JSON.parse(localStorage.getItem('tasks')) ?? []);
   }, []);
 
-  const completedTask = tasks.filter((task) => {
-    return task.isDone;
-  });
+  const completedTask = useMemo(() => {
+    return tasks.filter((task) => {
+      return task.isDone;
+    });
+  }, [tasks]);
 
-  const notCompletedTask = tasks.filter((task) => {
-    return !task.isDone;
-  });
+  const notCompletedTask = useMemo(() => {
+    return tasks.filter((task) => {
+      return !task.isDone;
+    });
+  }, [tasks]);
 
   let tasksToBeRender = tasks;
 
@@ -61,6 +76,7 @@ export default function TodoList() {
     setTasks(updateTasks);
     localStorage.setItem('tasks', JSON.stringify(updateTasks));
     setInputValue('');
+    openSnack.showSnackbar('The task was added successfully');
   }
 
   // localStorage.clear()
@@ -86,7 +102,7 @@ export default function TodoList() {
 
   function handleCheckComplete(value) {
     if (value == 'done') {
-      setListView(value); 
+      setListView(value);
     } else if (value == 'notDone') {
       setListView(value);
     } else if (value == 'all') {
@@ -102,8 +118,6 @@ export default function TodoList() {
     localStorage.setItem('tasks', JSON.stringify(newTasks));
   }
 
-  // let taskComplete = tasks
-
   function viewTasks() {
     return tasksToBeRender.map((task) => {
       return (
@@ -111,12 +125,58 @@ export default function TodoList() {
           key={task.id}
           task={task}
           handleCheck={handleCheck}
-          handleDelete={handleDelete}
           handleEdit={handleEdit}
+          setOpen={setOpen}
+          handleDeleteTask={handleDeleteTask}
+          handleClickOpen={handleClickOpen}
+          handleOpenEdit={handleOpenEdit}
         />
       );
     });
   }
+
+  // Dialog Delete
+  const handleClickOpen = (id) => {
+    setTaskId(id);
+    setOpen(true);
+  };
+
+  function handleDeleteTask(id) {
+    handleClose(id);
+  }
+
+  function handleClose(value) {
+    setOpen(false);
+  }
+
+  function DeleteTask(value) {
+    value ? handleDelete(taskId) : null;
+    setOpen(false);
+    openSnack.showSnackbar('The task has been deleted');
+  }
+  // Dialog Delete/
+
+  // Edit Dialog
+
+  const handleOpenEdit = (id) => {
+    setEditTaskId(id);
+    setopenEditDialog(true);
+  };
+
+  const handleCloseEdit = () => {
+    setopenEditDialog(false);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const formJson = Object.fromEntries(formData.entries());
+    const text = formJson.text;
+    handleEdit(editTaskId, text);
+    handleCloseEdit();
+    openSnack.showSnackbar('The task has been modified');
+  };
+  // Edit Dialog/
 
   return (
     <>
@@ -179,7 +239,60 @@ export default function TodoList() {
             }}
           />
         </div>
+        {/* Alert before delete */}
+        <Dialog
+          open={open}
+          onClose={() => handleClose(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {'Are you sure, you want to delete this task?'}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Let Google help apps determine location. This means sending
+              anonymous location data to Google, even when no apps are running.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => handleClose(false)}>No</Button>
+            <Button onClick={() => DeleteTask(true)} autoFocus>
+              delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+        {/* /Alert before delete */}
       </Container>
+      {/* Edit Dialog */}
+      <Dialog open={openEditDialog} onClose={handleCloseEdit}>
+        <DialogTitle>Edit Task</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter the new task name, and task details
+          </DialogContentText>
+          <form id="subscription-form" onSubmit={handleSubmit}>
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="name"
+              name="text"
+              label="Text Address"
+              type="text"
+              fullWidth
+              variant="standard"
+            />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit}>Cancel</Button>
+          <Button type="submit" form="subscription-form">
+            Edit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Edit Dialog/ */}
     </>
   );
 }

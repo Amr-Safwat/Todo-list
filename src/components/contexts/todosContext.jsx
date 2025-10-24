@@ -1,5 +1,5 @@
 import tasksReducer from '../reducers/TasksReducer';
-import {createContext, useReducer} from 'react';
+import {createContext, useContext, useReducer} from 'react';
 import {OpenSnackProvider} from '../contexts/SnackContext';
 
 const TodoContext = createContext([]);
@@ -13,4 +13,10 @@ const TodoProvider = ({children}) => {
   );
 };
 
-export {TodoProvider, TodoContext};
+export const useTasks = () => {
+  return useContext(TodoContext);
+};
+
+export default TodoProvider;
+
+

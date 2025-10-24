@@ -32,9 +32,30 @@ export default function tasksReducer(currState, action) {
       return newTasks;
     }
 
+    case 'toggleCompleted': {
+      const newTasks = currState.map((task) => {
+        if (task.id == action.payload.id) {
+          let newTask = {
+            ...task,
+            isDone: !task.isDone,
+          };
+          return newTask
+        }
+        return task;
+      });
+      localStorage.setItem('tasks', JSON.stringify(newTasks));
+      return newTasks;
+    }
+
     case 'getFromStorage': {
-      let tasksList = JSON.parse(localStorage.getItem('tasks'));
-      return tasksList;
+      const tasksList = JSON.parse(localStorage.getItem('tasks'));
+      if (tasksList == null) {
+        console.log(JSON.parse(localStorage.getItem('tasks')) == null);
+        return [];
+      } else {
+        return tasksList;
+      }
+
     }
     
     default: {

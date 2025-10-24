@@ -9,7 +9,6 @@ import {useEffect, useState, useMemo} from 'react';
 import Todo from './Todo';
 import {v4 as uuid4} from 'uuid';
 import {ToggleButton} from '@mui/material';
-import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -19,42 +18,21 @@ import DialogActions from '@mui/material/DialogActions';
 import {useContext} from 'react';
 import {OpenSnackContext} from './contexts/SnackContext';
 
-import { TodoContext } from './contexts/todosContext';
+import { useTasks } from './contexts/todosContext';
 
 export default function TodoList() {
-  // const [tasks, dispatch] = useReducer(tasksReducer, [
-  //   {
-  //     id: uuid4(),
-  //     taskName: 'Task 1',
-  //     taskInfo: 'this is for details Task One',
-  //     isDone: false,
-  //   },
-  //   {
-  //     id: uuid4(),
-  //     taskName: 'Task 2',
-  //     taskInfo: 'this is for details Task One',
-  //     isDone: false,
-  //   },
-  //   {
-  //     id: uuid4(),
-  //     taskName: 'Task 3',
-  //     taskInfo: 'this is for details Task One',
-  //     isDone: false,
-  //   },
-  // ]);
-  
-  const {tasks, dispatch} = useContext(TodoContext);
+  const {tasks, dispatch} = useTasks();
   const [inputValue, setInputValue] = useState('');
   const [listView, setListView] = useState('all');
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const [taskId, setTaskId] = useState();
-  const [openEditDialog, setopenEditDialog] = React.useState(false);
+  const [openEditDialog, setopenEditDialog] = useState(false);
   const [editTaskId, setEditTaskId] = useState();
   const openSnack = useContext(OpenSnackContext);
 
   useEffect(() => {
     dispatch({type: 'getFromStorage'})
-  }, []);
+  }, []);  
 
   const completedTask = useMemo(() => {
     return tasks.filter((task) => {
@@ -90,19 +68,6 @@ export default function TodoList() {
     openSnack.showSnackbar('The task was added successfully');
   }
 
-  // localStorage.clear()
-
-  function handleCheck(id) {
-    const newTasks = tasks.map((task) => {
-      if (task.id == id) {
-        task.isDone = !task.isDone;
-      }
-      return task;
-    });
-    // setTasks(newTasks);
-    localStorage.setItem('tasks', JSON.stringify(newTasks));
-  }
-
   function handleDelete(id) {
     dispatch({type: 'delete', payload: {id: id}});
   }
@@ -127,7 +92,6 @@ export default function TodoList() {
         <Todo
           key={task.id}
           task={task}
-          handleCheck={handleCheck}
           handleEdit={handleEdit}
           setOpen={setOpen}
           handleDeleteTask={handleDeleteTask}

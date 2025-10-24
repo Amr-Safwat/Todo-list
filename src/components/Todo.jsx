@@ -7,17 +7,24 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
+import { useTasks } from './contexts/todosContext';
+import { OpenSnackContext } from './contexts/SnackContext';
 
+export default function Todo({task, handleClickOpen, handleOpenEdit}) {
 
-export default function Todo({
-  task,
-  handleCheck,
-  setOpen,
-  handleEdit,
-  handleDeleteTask,
-  handleClickOpen,
-  handleOpenEdit,
-}) {
+  const openSnackbar = React.useContext(OpenSnackContext)
+  const {tasks, dispatch} = useTasks()
+
+  function handleCheck() {
+    dispatch({
+      type: 'toggleCompleted',
+      payload: {
+        id: task.id,
+      },
+    });
+    openSnackbar.showSnackbar('Completed')
+  }
+  
   return (
     <>
       <Card
@@ -43,13 +50,16 @@ export default function Todo({
               >
                 <DeleteIcon />
               </IconButton>
-              <IconButton aria-label="edit" onClick={() => handleOpenEdit(task.id)}>
+              <IconButton
+                aria-label="edit"
+                onClick={() => handleOpenEdit(task.id)}
+              >
                 <EditIcon />
               </IconButton>
               <IconButton
                 aria-label="check"
                 onClick={() => {
-                  handleCheck(task.id);
+                  handleCheck();
                 }}
               >
                 <CheckCircleOutlineIcon />

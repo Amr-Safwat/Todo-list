@@ -1,15 +1,13 @@
 import './App.css';
-import {useState} from 'react';
-
 import TodoList from './components/TodoList';
-import {OpenSnackProvider} from './components/SnackContext';
+import {TodoProvider} from './components/contexts/todosContext';
 
 export default function App() {
   return (
     <div className="App">
-      <OpenSnackProvider>
-        <TodoList />
-      </OpenSnackProvider>
+      <TodoProvider>
+          <TodoList />
+      </TodoProvider>
     </div>
   );
 }

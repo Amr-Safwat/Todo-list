@@ -1,6 +1,5 @@
 import {
   Container,
-  ButtonGroup,
   Button,
   TextField,
   Divider,
@@ -18,28 +17,43 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 
 import {useContext} from 'react';
-import {OpenSnackContext} from './SnackContext';
+import {OpenSnackContext} from './contexts/SnackContext';
+
+import { TodoContext } from './contexts/todosContext';
 
 export default function TodoList() {
-  const [tasks, setTasks] = useState([
-    {
-      id: uuid4(),
-      taskName: 'Task 1',
-      taskInfo: 'this is for details Task One',
-      isDone: false,
-    },
-  ]);
+  // const [tasks, dispatch] = useReducer(tasksReducer, [
+  //   {
+  //     id: uuid4(),
+  //     taskName: 'Task 1',
+  //     taskInfo: 'this is for details Task One',
+  //     isDone: false,
+  //   },
+  //   {
+  //     id: uuid4(),
+  //     taskName: 'Task 2',
+  //     taskInfo: 'this is for details Task One',
+  //     isDone: false,
+  //   },
+  //   {
+  //     id: uuid4(),
+  //     taskName: 'Task 3',
+  //     taskInfo: 'this is for details Task One',
+  //     isDone: false,
+  //   },
+  // ]);
+  
+  const {tasks, dispatch} = useContext(TodoContext);
   const [inputValue, setInputValue] = useState('');
   const [listView, setListView] = useState('all');
   const [open, setOpen] = React.useState(false);
   const [taskId, setTaskId] = useState();
   const [openEditDialog, setopenEditDialog] = React.useState(false);
   const [editTaskId, setEditTaskId] = useState();
-
   const openSnack = useContext(OpenSnackContext);
 
   useEffect(() => {
-    setTasks(JSON.parse(localStorage.getItem('tasks')) ?? []);
+    dispatch({type: 'getFromStorage'})
   }, []);
 
   const completedTask = useMemo(() => {
@@ -65,16 +79,13 @@ export default function TodoList() {
   }
 
   function addTask() {
-    let newTask = {
+    dispatch({
+      type: 'added',
       id: uuid4(),
       taskName: inputValue,
       taskInfo: 'this is for details Task One',
       isDone: false,
-    };
-
-    const updateTasks = [...tasks, newTask];
-    setTasks(updateTasks);
-    localStorage.setItem('tasks', JSON.stringify(updateTasks));
+    });
     setInputValue('');
     openSnack.showSnackbar('The task was added successfully');
   }
@@ -88,16 +99,12 @@ export default function TodoList() {
       }
       return task;
     });
-    setTasks(newTasks);
+    // setTasks(newTasks);
     localStorage.setItem('tasks', JSON.stringify(newTasks));
   }
 
   function handleDelete(id) {
-    let newTasks = tasks.filter((task) => {
-      return task.id == id ? null : task;
-    });
-    setTasks(newTasks);
-    localStorage.setItem('tasks', JSON.stringify(newTasks));
+    dispatch({type: 'delete', payload: {id: id}});
   }
 
   function handleCheckComplete(value) {
@@ -111,11 +118,7 @@ export default function TodoList() {
   }
 
   function handleEdit(id, text) {
-    const newTasks = tasks.map((task) => {
-      return task.id == id ? {...task, taskName: text} : task;
-    });
-    setTasks(newTasks);
-    localStorage.setItem('tasks', JSON.stringify(newTasks));
+    dispatch({type: 'edit', payload: {id: id, text: text}});
   }
 
   function viewTasks() {

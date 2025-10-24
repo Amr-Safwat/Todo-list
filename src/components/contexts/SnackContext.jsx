@@ -1,9 +1,9 @@
 import {createContext, useState} from 'react';
-import MySnackbar from './MySnackbar';
+import MySnackbar from '../MySnackbar';
 
-export const OpenSnackContext = createContext({});
+ const OpenSnackContext = createContext({});
 
-export const OpenSnackProvider = ({children})=>{
+ const OpenSnackProvider = ({children})=>{
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -18,3 +18,5 @@ export const OpenSnackProvider = ({children})=>{
     </OpenSnackContext.Provider>
   );
 }
+
+export {OpenSnackContext, OpenSnackProvider};
